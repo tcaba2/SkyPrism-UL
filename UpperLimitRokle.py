@@ -51,14 +51,19 @@ for Bin, E in enumerate(ELow):
         OnMap = SkyMap()
         OnMap.readFITS(Conf.Get("Outfilepath") + Projectname + "_OnMap" + ".fits", Bin+1)
         Non = OnMap.Image
+
         HadMap = SkyMap()
         HadMap.readFITS(Conf.Get("Outfilepath") + Projectname + "_BkgMap" + ".fits", Bin+1)
-        Noff = HadMap.Image
 
         ExpMap = SkyMap()
         ExpMap.readFITS(Conf.Get("Outfilepath")+ Projectname + "_Exposure_Eest" + ".fits", Bin+1)
         ex = ExpMap.Image
 
+        NormMask = np.where( 1.0 - ExMap.transpose() > 0 )
+        MedianRatio    = np.mean(OnMap.Image[NormMask])/np.mean(HadMap.Image[NormMask])
+
+        NC_HadMap = HadMap.Scale(MedianRatio)
+        Noff = NC_HadMap.Image.T
 ################## Applying the Rolke Method #############
 
 tr = TRolke(0.95)
